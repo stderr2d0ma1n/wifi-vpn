@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "module_id": "vpn.amneziawg",
+  "name": "AmneziaWG observability",
+  "api_version": "v1",
+  "capabilities": ["health", "history", "events", "upstream_updates", "prometheus"],
+  "control_enabled": false,
+  "transport": "HTTP over loopback; use SSH forwarding or a trusted backend",
+  "endpoints": ["/v1/status", "/v1/history", "/v1/events", "/v1/updates", "/v1/manifest", "/metrics"],
+  "health_interval_seconds": 300,
+  "history_retention_days": 30,
+  "configuration_contains_secrets": false
+}

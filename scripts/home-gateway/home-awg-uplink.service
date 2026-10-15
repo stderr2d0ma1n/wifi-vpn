@@ -1,0 +1,16 @@
+[Unit]
+Description=Marked household AWG uplink; no automatic household activation
+Requires=home-awg-probe.service
+After=home-awg-probe.service
+PartOf=home-awg-probe.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/python3 /usr/local/lib/home-gateway/awg_uplink.py up
+ExecStop=/usr/bin/python3 /usr/local/lib/home-gateway/awg_uplink.py down
+TimeoutStartSec=45
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

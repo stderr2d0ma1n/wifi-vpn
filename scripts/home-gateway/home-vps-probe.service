@@ -1,0 +1,25 @@
+[Unit]
+Description=Loopback-only VPS connectivity probe, independent of home routing
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=sing-box
+Group=sing-box
+ExecStart=/usr/bin/sing-box run -c /etc/home-vps-probe/config.json
+Restart=on-failure
+RestartSec=3
+CapabilityBoundingSet=
+AmbientCapabilities=
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+
+[Install]
+WantedBy=multi-user.target

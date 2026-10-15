@@ -1,0 +1,26 @@
+[Unit]
+Description=Isolated AmneziaWG DNS and HTTPS probe
+Requires=home-awg-probe.service
+After=home-awg-probe.service
+
+[Service]
+Type=oneshot
+User=vpn-monitor
+Group=vpn-monitor
+NetworkNamespacePath=/run/netns/home-awg-test
+BindReadOnlyPaths=/etc/netns/home-awg-test/resolv.conf:/etc/resolv.conf
+ExecStart=/usr/bin/python3 /usr/local/lib/vpn-monitor/monitor.py netcheck
+TimeoutStartSec=35
+RuntimeDirectory=vpn-monitor-netcheck
+RuntimeDirectoryMode=0750
+RuntimeDirectoryPreserve=yes
+UMask=0027
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/run/vpn-monitor-netcheck
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+MemoryMax=96M
+CPUQuota=10%

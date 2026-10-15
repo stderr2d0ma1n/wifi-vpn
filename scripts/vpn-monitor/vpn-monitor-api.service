@@ -1,0 +1,22 @@
+[Unit]
+Description=Read-only VPN observability API on loopback
+After=network.target
+
+[Service]
+User=vpn-monitor-api
+Group=vpn-monitor
+ExecStart=/usr/bin/python3 /usr/local/lib/vpn-monitor/monitor.py serve
+Restart=on-failure
+RestartSec=10
+UMask=0027
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+RestrictAddressFamilies=AF_INET AF_UNIX
+MemoryMax=96M
+CPUQuota=10%
+
+[Install]
+WantedBy=multi-user.target

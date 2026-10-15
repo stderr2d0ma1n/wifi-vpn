@@ -1,0 +1,13 @@
+[Unit]
+Description=Home gateway NAT and forwarding guard
+Wants=network-online.target
+After=network-online.target
+Before=sing-box.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/lib/home-gateway/network_guard.py --settings /etc/home-gateway/network.json --mode-file /etc/home-gateway/mode
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

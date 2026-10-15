@@ -1,0 +1,11 @@
+[Unit]
+Description=Check isolated AWG every five minutes
+
+[Timer]
+OnBootSec=90s
+OnUnitActiveSec=5min
+AccuracySec=15s
+Unit=vpn-monitor-health.service
+
+[Install]
+WantedBy=timers.target

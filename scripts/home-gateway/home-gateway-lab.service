@@ -1,0 +1,16 @@
+[Unit]
+Description=Isolated virtual-client gateway validation; never household activation
+After=home-awg-uplink.service
+
+[Service]
+User=sing-box
+Group=sing-box
+ExecStart=/usr/bin/sing-box run -c /run/home-gateway-lab/config.json
+Restart=no
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW CAP_NET_BIND_SERVICE
+NoNewPrivileges=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/run/home-gateway-lab/data
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK

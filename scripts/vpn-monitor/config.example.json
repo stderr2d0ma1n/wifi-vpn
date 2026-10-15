@@ -1,0 +1,24 @@
+{
+  "expected_exit_ip": "192.0.2.1",
+  "dns_server": "1.1.1.1",
+  "database": "/var/lib/vpn-monitor/monitor.sqlite3",
+  "netcheck_result": "/run/vpn-monitor-netcheck/result.json",
+  "updates_result": "/var/lib/vpn-monitor-updates/releases.json",
+  "updates_cache": "/var/lib/vpn-monitor-updates/cache.json",
+  "failure_threshold": 3,
+  "retention_days": 30,
+  "stale_after_seconds": 900,
+  "gateway_guard": {
+    "expected_mode": "direct",
+    "mode_file": "/etc/home-gateway/mode",
+    "config_file": "/etc/sing-box/config.json",
+    "resolver_file": "/etc/resolv.conf"
+  },
+  "components": [
+    {"id": "amneziawg-go", "repo": "amnezia-vpn/amneziawg-go", "kind": "tags", "installed": null, "installed_as_of": null, "watch_only": false},
+    {"id": "amneziawg-tools", "repo": "amnezia-vpn/amneziawg-tools", "kind": "releases", "installed": null, "installed_as_of": null, "watch_only": false},
+    {"id": "amnezia-client", "repo": "amnezia-vpn/amnezia-client", "kind": "releases", "installed": null, "installed_as_of": null, "watch_only": true},
+    {"id": "sing-box", "repo": "SagerNet/sing-box", "kind": "releases", "installed": null, "installed_as_of": null, "watch_only": false},
+    {"id": "xray-core", "repo": "XTLS/Xray-core", "kind": "releases", "installed": null, "installed_as_of": null, "watch_only": true}
+  ]
+}

@@ -1,0 +1,23 @@
+[Unit]
+Description=Check official VPN upstream releases without installing
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=vpn-monitor
+Group=vpn-monitor
+ExecStart=/usr/bin/python3 /usr/local/lib/vpn-monitor/monitor.py updates
+StateDirectory=vpn-monitor-updates
+StateDirectoryMode=0750
+UMask=0027
+TimeoutStartSec=120
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/vpn-monitor-updates
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+MemoryMax=96M
+CPUQuota=10%

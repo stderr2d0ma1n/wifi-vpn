@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly official VPN release discovery
+
+[Timer]
+OnCalendar=Mon *-*-* 09:40:00 Europe/Moscow
+RandomizedDelaySec=2min
+Persistent=true
+Unit=vpn-monitor-updates.service
+
+[Install]
+WantedBy=timers.target

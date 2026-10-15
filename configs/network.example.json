@@ -1,0 +1,6 @@
+{
+  "lan_ip": "192.0.2.148",
+  "lan_cidr": "192.0.2.0/24",
+  "interface": "eth0",
+  "upstream_dns": "192.0.2.1"
+}

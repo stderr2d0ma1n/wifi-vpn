@@ -1,0 +1,12 @@
+[Unit]
+Description=Observe active home VPN and roll back to direct on failure
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/gatewayctl watch
+TimeoutStartSec=90
+Nice=5
+PrivateTmp=yes
+ProtectHome=yes
+MemoryMax=96M

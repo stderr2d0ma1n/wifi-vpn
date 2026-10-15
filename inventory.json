@@ -1,0 +1,452 @@
+{
+  "schema_version": 1,
+  "prepared_date": "2026-10-15",
+  "target": "wifi-vpn private source repository; no deployed credentials or local state",
+  "objects": [
+    {
+      "id": "home-gateway",
+      "kind": "scripts",
+      "purpose": "Prepare and manage a Linux home gateway with native AmneziaWG uplink, compact pinned domain/IP routing, kernel whole-device bypass, guarded activation and local automatic recovery to direct routing/DNS. Verify using a real isolated virtual client without activating household traffic. Includes VLESS comparison, private iPhone export and Orange Pi recovery tools.",
+      "status": "active_awg_owner_confirmed_auto_rollback_enabled",
+      "paths": [
+        "scripts/home-gateway"
+      ],
+      "dependencies": [
+        "Python >= 3.9",
+        "Linux with systemd, TUN, nftables and nfqueue",
+        "sing-box 1.14 from official repository",
+        "iproute2, netplan, curl and dnsutils; root for initial installation and packet tests",
+        "SSH access to the user-owned board",
+        "Optional VPS: fresh Debian/Ubuntu server, official signed sing-box package, ufw, verified SSH key access and a suitable reachable TLS handshake host",
+        "Optional macOS USB recovery: Xcode Command Line Tools and libusb",
+        "Optional image personalization: e2fsprogs debugfs, official Armbian image, SSH public key",
+        "Optional AWG userspace build: official pinned Go 1.27.2, AmneziaWG Go/tools sources, make/gcc/libc headers for ARM CLI; see README",
+        "Optional iPhone profiles: AmneziaWG with AWG 3.1 support or Happ; private AirDrop/file import",
+        "Optional Xray interoperability check: verified official Linux release binary for target architecture",
+        "Optional private JSON QR: macOS system CoreImage/ImageIO/UniformTypeIdentifiers and Swift Command Line Tools; local decode verification",
+        "Optional private subscription import: existing working AWG, Python 3.9+, systemd LoadCredential support, iptables, service user sing-box; manual 15-minute service only",
+        "Home readiness: existing isolated AWG peer and vpn-monitor group; pinned binary SRS rule sets from MetaCubeX and runetfreedom; see HOME_READY.md"
+      ],
+      "restore": "Follow scripts/home-gateway/README.md and HOME_READY.md. Compare installed sources and preserve local settings before upgrades. Public per-device deployment metadata stays in .local-only; SSH/VPN secrets remain in existing private paths outside Git. Run isolated readiness verification after policy/source changes. Household activation requires separate explicit owner OK; never restore by blindly enabling rules."
+    },
+    {
+      "id": "vpn-monitor",
+      "kind": "scripts_and_module",
+      "purpose": "Read-only AmneziaWG monitoring with isolated probes, debounced health, SQLite history/events, weekly official upstream checks, loopback API/Prometheus, gateway rollback status and deduplicated SSH notifications for a future unified personal admin.",
+      "status": "deployed_gateway_rollback_aware_household_rules",
+      "paths": [
+        "scripts/vpn-monitor"
+      ],
+      "dependencies": [
+        "Python >= 3.9 standard library",
+        "Linux systemd with NetworkNamespacePath, curl, iproute2 and CA certificates",
+        "Existing isolated home-gateway AmneziaWG probe units",
+        "SSH client and POSIX file locking for optional notification consumer",
+        "Optional Codex desktop heartbeat notifications require the host awake, app running and SSH connectivity"
+      ],
+      "restore": "Follow scripts/vpn-monitor/README.md; personalize public configuration outside Git. Preserve installed config and compare source hashes before upgrades. Private deployment inventory and automation IDs remain in local-only storage; VPN/SSH keys are never copied. Monitor does not activate household VPN or install protocol updates."
+    }
+  ],
+  "files": [
+    {
+      "path": ".gitignore",
+      "bytes": 4949,
+      "sha256": "dbf9ca2c1afe5aba16764ba0fbb4c3622c293f5174f56b155ae9ebb2fde11829"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 1868,
+      "sha256": "344dec689a499bc1d77332c616f23b0eb4b6face05070db5c88a01d2d15f6384"
+    },
+    {
+      "path": "README.md",
+      "bytes": 7210,
+      "sha256": "381b22223e4a76c90865591a51fb7cbb11577c76d1fb42f46b4c84dadee8a24a"
+    },
+    {
+      "path": "configs/home-ready.example.json",
+      "bytes": 97,
+      "sha256": "cf794ac2968172c893c4052d4b47b070d508871e5d3e049b354ac9ff1356b1df"
+    },
+    {
+      "path": "configs/network.example.json",
+      "bytes": 114,
+      "sha256": "39b614150c1f192c54d5ec9704bbc2c82b0ac2a2c86c8baa820b037b3b16c930"
+    },
+    {
+      "path": "docs/OPERATIONS.md",
+      "bytes": 4871,
+      "sha256": "9bc9f22b7b383fc540b0d253d24bbabf0685f157e4a1a8a04a0acad47995856e"
+    },
+    {
+      "path": "scripts/ai_power.py",
+      "bytes": 4682,
+      "sha256": "f92ceb4fced5cf3f0071481de38a9b5bb1667b0ef0e8fbb956488436bc210353"
+    },
+    {
+      "path": "scripts/home-gateway/HOME_READY.md",
+      "bytes": 11372,
+      "sha256": "20f5ef258e86ae6b841a20bb2f14b5266159623ff5ca07eb2c96a651872e72ea"
+    },
+    {
+      "path": "scripts/home-gateway/README.md",
+      "bytes": 35551,
+      "sha256": "f98951ee2321e6cc1773c3b3f2b15561729a3d109ad70a54876e3c1fc0e582b0"
+    },
+    {
+      "path": "scripts/home-gateway/add_vless_client.py",
+      "bytes": 3661,
+      "sha256": "75e3a7b2ca271b4149cc94eaf3c70e904bc7e65b89cc9543e302c0c736c3e050"
+    },
+    {
+      "path": "scripts/home-gateway/awg-uplink-probe.conf",
+      "bytes": 37,
+      "sha256": "0db1b811e37ab9a61d9552e233e6f8165ee9bb56bf93779fe5d93fc3f3ef4349"
+    },
+    {
+      "path": "scripts/home-gateway/awg_config.py",
+      "bytes": 4632,
+      "sha256": "8e64b92ed90ed36463c8ac2b90c9b4391b6e527b17c97bc4a63be709f0a94bce"
+    },
+    {
+      "path": "scripts/home-gateway/awg_runtime.py",
+      "bytes": 4985,
+      "sha256": "eed7860b607c511b38ac9ef3241c86e32196590b31e0282229615b1e83b8ee88"
+    },
+    {
+      "path": "scripts/home-gateway/awg_uplink.py",
+      "bytes": 5306,
+      "sha256": "a9aa4e5e4e5405ec2fbf2d1f2a5edc71de20d1d849b4ead2cdd8a937ce172c4f"
+    },
+    {
+      "path": "scripts/home-gateway/benchmark_vpn.py",
+      "bytes": 6513,
+      "sha256": "1841b27b392188818ebba7c6072f22c8873b0c501225a84e71b3f03884028515"
+    },
+    {
+      "path": "scripts/home-gateway/bootstrap_board.sh",
+      "bytes": 637,
+      "sha256": "9ae057422d39106814e7754c25f708195cfcc1b7d7dcfd37d4b7453663fd25fd"
+    },
+    {
+      "path": "scripts/home-gateway/bootstrap_vps_key.sh",
+      "bytes": 1746,
+      "sha256": "8b06d52e7a6433980df0111a67d37bdb753527f8536e4dafccd06584a1037a86"
+    },
+    {
+      "path": "scripts/home-gateway/build_awg.sh",
+      "bytes": 1955,
+      "sha256": "9ff7bb5ac2ae2a71d624b1f980aebdbd9ab3eba0de3cb120c7b304826b65fb97"
+    },
+    {
+      "path": "scripts/home-gateway/build_config.py",
+      "bytes": 9690,
+      "sha256": "be2c0e8ccc7d771093e0e954c090617ddab897ebaa3ab3cfcab5ee14e9794eb9"
+    },
+    {
+      "path": "scripts/home-gateway/build_rkdeveloptool.py",
+      "bytes": 3521,
+      "sha256": "46bc7f71d38a9558bc7084467b13109fededd144fedfa6ea3a411b8126376c6b"
+    },
+    {
+      "path": "scripts/home-gateway/dhcp_inform.py",
+      "bytes": 3460,
+      "sha256": "fa1df7dce6e4d643b96a12c40ab27b54f76e752b670c9b8c15bd673010eb67b8"
+    },
+    {
+      "path": "scripts/home-gateway/export_iphone_profiles.sh",
+      "bytes": 1805,
+      "sha256": "c1d5d0c6704bdc81677db6df1360dbb1a8e072363bcbd8426ece02db720748cd"
+    },
+    {
+      "path": "scripts/home-gateway/fallback_dns.py",
+      "bytes": 3293,
+      "sha256": "5d1a476d785547d20e5698455f05a55a88202c2518611e81dab7be99fa157635"
+    },
+    {
+      "path": "scripts/home-gateway/gateway_cli.py",
+      "bytes": 4578,
+      "sha256": "208f056c526e1dd971af32ce5f2f501eae430e3e63f3f4564a4009e99728a65e"
+    },
+    {
+      "path": "scripts/home-gateway/gateway_safety.py",
+      "bytes": 14943,
+      "sha256": "84c3116ca540a4aca33ea8eb3609a80e3c230b071f9a0a17e6b00a65ed47b922"
+    },
+    {
+      "path": "scripts/home-gateway/gatewayctl.py",
+      "bytes": 145,
+      "sha256": "429efa388b0af0a97b0f904467af1edc747416676cdfb0e91b82bb63324cc98f"
+    },
+    {
+      "path": "scripts/home-gateway/harden_vps_ssh.sh",
+      "bytes": 1330,
+      "sha256": "d2ae0d7ccb87362a7374c35d17b079726cf847f3fafa7c98a79e8a4ff26648f2"
+    },
+    {
+      "path": "scripts/home-gateway/home-awg-probe-network.service",
+      "bytes": 384,
+      "sha256": "5c1c3a8c6d33f5b6e79f3df5899763bde53746957c72baf37e3711eb6a870966"
+    },
+    {
+      "path": "scripts/home-gateway/home-awg-probe.service",
+      "bytes": 792,
+      "sha256": "5fde0a08a95ed4a6412cfeeac541c09f2ec1e6d7e6acc52af426e6a499d7f09d"
+    },
+    {
+      "path": "scripts/home-gateway/home-awg-uplink.service",
+      "bytes": 437,
+      "sha256": "9f3d5ae66a589ccaa4980669ac07131b97dc5618620738b8fec3218b3f293b99"
+    },
+    {
+      "path": "scripts/home-gateway/home-awg.service",
+      "bytes": 813,
+      "sha256": "fd965ac5ef2b29a671ab8e29b012b4894946a62961129bc93a86e7392ec9e364"
+    },
+    {
+      "path": "scripts/home-gateway/home-gateway-fallback-dns.service",
+      "bytes": 515,
+      "sha256": "930e1a3d2df082f73501d75030d128e1176d94d488127d769b52425981a65bbe"
+    },
+    {
+      "path": "scripts/home-gateway/home-gateway-lab-dns.service",
+      "bytes": 415,
+      "sha256": "aa9b0f7f61d2d676e98cbd2b3bf964f911e2e14f21376968edbf535815c1b197"
+    },
+    {
+      "path": "scripts/home-gateway/home-gateway-lab.service",
+      "bytes": 535,
+      "sha256": "4cec07c5e400adbdde657382d4cde61b01605cd3c01e74d669ed7c430476f3ab"
+    },
+    {
+      "path": "scripts/home-gateway/home-gateway-network.service",
+      "bytes": 368,
+      "sha256": "d521abbb8a1c27c692a6e57a6a835055da184c86526f74b2f9e86ff14fcc097c"
+    },
+    {
+      "path": "scripts/home-gateway/home-gateway-usb.network",
+      "bytes": 129,
+      "sha256": "f6db7c25c7734c5eb01158547788e3600b45e79c1192232b71561f7cd0048a49"
+    },
+    {
+      "path": "scripts/home-gateway/home-gateway-usb.service",
+      "bytes": 276,
+      "sha256": "00e87209ea0edba0cb44d0992e0b4786ee0dc22c5b9c18671e9a27a7ab4dce02"
+    },
+    {
+      "path": "scripts/home-gateway/home-gateway-watchdog.service",
+      "bytes": 244,
+      "sha256": "828b98ef080260c35d4bd2c137b91e0a2b1e84b6d789b85cb4397d8ab2121006"
+    },
+    {
+      "path": "scripts/home-gateway/home-gateway-watchdog.timer",
+      "bytes": 177,
+      "sha256": "0bcfb4922dbc471b7eef03a5b4a54d5ce463250eb30818dddaed436829d7191b"
+    },
+    {
+      "path": "scripts/home-gateway/home-vpn-import.service",
+      "bytes": 856,
+      "sha256": "4aa309d1d9ae8b60e65dc1a7e7a7515d47213b5fc3cecfc5e3b5ac359a9df44c"
+    },
+    {
+      "path": "scripts/home-gateway/home-vps-probe.service",
+      "bytes": 582,
+      "sha256": "60f360907ecb9698ef6f0bf007c4d477f1996ce94fbc4539c7fb6b39f573e20a"
+    },
+    {
+      "path": "scripts/home-gateway/home-vps.service",
+      "bytes": 594,
+      "sha256": "103afc64a647d6bd4f2105945312c3f7d1ab054b89966fc5bdea621aa59740a4"
+    },
+    {
+      "path": "scripts/home-gateway/inspect.sh",
+      "bytes": 1393,
+      "sha256": "c7b27d704766383d726e9fdef6a5abfc37db3be30dbfb210f16e0fea26f181c7"
+    },
+    {
+      "path": "scripts/home-gateway/install_awg_probe.sh",
+      "bytes": 1250,
+      "sha256": "484ae72abba0018278f853c5de3c935d2f2d0db2a9be72fe9e970230e19c42e4"
+    },
+    {
+      "path": "scripts/home-gateway/install_awg_server.sh",
+      "bytes": 1790,
+      "sha256": "071a8bcfdfceb18b74576bb6e9a63f38fc043597b318ac49c40479901b79ca67"
+    },
+    {
+      "path": "scripts/home-gateway/install_board.sh",
+      "bytes": 4002,
+      "sha256": "62c50c84e49fe849eb8dcb76b8992ce62f2165c49983eccddc1dc72dfbd3ff22"
+    },
+    {
+      "path": "scripts/home-gateway/install_home_ready.sh",
+      "bytes": 2910,
+      "sha256": "6d68e00998c8bb465cb6e93b5e301f22277510fde1eb79d39869c03ea298ec1e"
+    },
+    {
+      "path": "scripts/home-gateway/install_probe.sh",
+      "bytes": 1835,
+      "sha256": "03ec4fd175b757e6d20d3f1d761bdf8f3f1ec9b033964b2504e830d717036522"
+    },
+    {
+      "path": "scripts/home-gateway/install_vps.sh",
+      "bytes": 1981,
+      "sha256": "0717268391c8e13a26687eb8d8853864b5354e17d145be46332a4198c75f39fd"
+    },
+    {
+      "path": "scripts/home-gateway/make_happ_profile.py",
+      "bytes": 2819,
+      "sha256": "26c39888d69c6fb18e331cb32f2e3d55d7546e603d40a7e70f08a9dab64df532"
+    },
+    {
+      "path": "scripts/home-gateway/network_guard.py",
+      "bytes": 5397,
+      "sha256": "027ad7cb92bdccc26594f4e7c9f5928b9b3fcec96d4593be8fdc5a57b0011ea6"
+    },
+    {
+      "path": "scripts/home-gateway/policy.example.json",
+      "bytes": 112,
+      "sha256": "88ef9a598f75de7b3bbc3fcf5cd494e419f0dac213c0551c4a5b22102aaa4d59"
+    },
+    {
+      "path": "scripts/home-gateway/prepare_armbian_image.py",
+      "bytes": 8159,
+      "sha256": "0e2d5efb095af7d0aeb03913274fd6a6147ab74d841d0704e90947149462d1bb"
+    },
+    {
+      "path": "scripts/home-gateway/prepare_rule_sets.py",
+      "bytes": 3408,
+      "sha256": "3a6867cf7f9b93f2078f942140e45f940c0c6640b48e01e92d2ed0a04a6666ef"
+    },
+    {
+      "path": "scripts/home-gateway/private_profile_server.py",
+      "bytes": 4953,
+      "sha256": "e0f71eb5f754fc20e03b6791f2200e02c556d49838636690349c61ad31b4f57b"
+    },
+    {
+      "path": "scripts/home-gateway/private_qr.swift",
+      "bytes": 3581,
+      "sha256": "6b1c36bb58f155b29ab595e8a9ed9fbe3bd75d300587028c991336b6e9687ee5"
+    },
+    {
+      "path": "scripts/home-gateway/sing-box-gateway.conf",
+      "bytes": 364,
+      "sha256": "01317fc05391046cba1f1e6eefada89e33a2c4712d1ecd499ac7d438f0254be8"
+    },
+    {
+      "path": "scripts/home-gateway/test_home_safety.py",
+      "bytes": 3995,
+      "sha256": "40f510cb806ecf88a8d01ad673c844faa4a95fb841bcc9568e386d629b31bb5a"
+    },
+    {
+      "path": "scripts/home-gateway/usb_access.sh",
+      "bytes": 1898,
+      "sha256": "863fae0f459116d117a79118b6f10a215e50fb86f8ae563b959550c6f05dc45e"
+    },
+    {
+      "path": "scripts/home-gateway/verify_home_ready.py",
+      "bytes": 19151,
+      "sha256": "9ca2d5a50c1c1a445506a55274897c15794a338fd0b12df2dcf144044784ec96"
+    },
+    {
+      "path": "scripts/home-gateway/verify_packets.sh",
+      "bytes": 5044,
+      "sha256": "b617a2013b11a0798def3fab8a7a2d694d8abe8b9e5539a88e438c8b1713666b"
+    },
+    {
+      "path": "scripts/home-gateway/verify_rk3399_loader.py",
+      "bytes": 2950,
+      "sha256": "72c36f582ca4d101a4344903c559db4b2e0030c61ea89dcc45128e9fcb36bc54"
+    },
+    {
+      "path": "scripts/home-gateway/verify_vps_loopback.py",
+      "bytes": 3947,
+      "sha256": "bafeec474ea65f482d28d6d9183cb419600f0a3830a08a2a1df95d8d176de949"
+    },
+    {
+      "path": "scripts/home-gateway/verify_vps_probe.sh",
+      "bytes": 1476,
+      "sha256": "49323bd602bf99c8874de0f070578a825a4867cbc4d3e7649233deec5310b471"
+    },
+    {
+      "path": "scripts/home-gateway/verify_xray_client.py",
+      "bytes": 9432,
+      "sha256": "98413a694ed8117f1e0d1f93a240666e517651ab7169a30f4368872a723dd043"
+    },
+    {
+      "path": "scripts/home-gateway/vpn-off.command",
+      "bytes": 851,
+      "sha256": "a8a4539fec4ac61b3efc9d5271340645f3e9564c59ba19812d1e89a3d454d4ac"
+    },
+    {
+      "path": "scripts/home-gateway/vps_config.py",
+      "bytes": 5859,
+      "sha256": "f93e7e9e235c0334bc825440b76cd220f044f8ccf8c37de649bd5a39e41e6333"
+    },
+    {
+      "path": "scripts/vpn-monitor/README.md",
+      "bytes": 9875,
+      "sha256": "9a4083d7ea6ffdce8b20dbe5d20030cc1aaeff07fc5227f675e80666486de5bb"
+    },
+    {
+      "path": "scripts/vpn-monitor/client.py",
+      "bytes": 6661,
+      "sha256": "c4c56dbc3b5b0406c10b400eb570b50229a24ee3d6d76e2584173b4fd20c1af0"
+    },
+    {
+      "path": "scripts/vpn-monitor/config.example.json",
+      "bytes": 1324,
+      "sha256": "00036ee5eaf46d55be975171d912e000dc6c3cf8a261f9134f88b8d841d985b6"
+    },
+    {
+      "path": "scripts/vpn-monitor/install.sh",
+      "bytes": 1577,
+      "sha256": "1bb89c4ffb9923d74847faae81575ea41f5eb9b54086b0d443093bf2d4e2869c"
+    },
+    {
+      "path": "scripts/vpn-monitor/manifest.json",
+      "bytes": 521,
+      "sha256": "3a63bab5722f6857bd8f395ca469a47beafd09d9040b106fe14ac91a2fbb4b74"
+    },
+    {
+      "path": "scripts/vpn-monitor/monitor.py",
+      "bytes": 19577,
+      "sha256": "7cc4c04ddc144886d7f78ca165204a22729e248fd06236be02adf723174fab95"
+    },
+    {
+      "path": "scripts/vpn-monitor/test_monitor.py",
+      "bytes": 7899,
+      "sha256": "39f162a149dd12d34e31ae04a4fa2b52e07760017b4012772fd058572333e3cb"
+    },
+    {
+      "path": "scripts/vpn-monitor/vpn-monitor-api.service",
+      "bytes": 449,
+      "sha256": "b29a0afebcbb9e3c0e231bda009c23d459eaddc0fad5fc7d7bcef0da9e766d44"
+    },
+    {
+      "path": "scripts/vpn-monitor/vpn-monitor-health.service",
+      "bytes": 566,
+      "sha256": "fd6ed6b8dfd2c45e96d2d04ac5b9c44ee290352c1c0b840845bc9fae53a9d9bd"
+    },
+    {
+      "path": "scripts/vpn-monitor/vpn-monitor-health.timer",
+      "bytes": 183,
+      "sha256": "1bb7196f15a0beb0a047f089a8c5b722f4dc6bfdf442fffd41d3879f14c27d26"
+    },
+    {
+      "path": "scripts/vpn-monitor/vpn-monitor-netcheck.service",
+      "bytes": 705,
+      "sha256": "76fbf318721af1019eb456baf5e9236af42aea00e746528721836c44804c70d2"
+    },
+    {
+      "path": "scripts/vpn-monitor/vpn-monitor-updates.service",
+      "bytes": 568,
+      "sha256": "6e56fa93a32e1191210b8ddcf66da34c070955aa441046883935cde18066f415"
+    },
+    {
+      "path": "scripts/vpn-monitor/vpn-monitor-updates.timer",
+      "bytes": 217,
+      "sha256": "666883025fdcb93d2f2a529749d73ef147bed0c0a2611af375366a0e8e1cdb53"
+    }
+  ]
+}

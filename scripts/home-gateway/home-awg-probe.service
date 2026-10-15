@@ -1,0 +1,23 @@
+[Unit]
+Description=Isolated AWG 3.1 probe; no home gateway activation
+Wants=network-online.target
+Requires=home-awg-probe-network.service
+After=network-online.target sing-box.service home-awg-probe-network.service
+PartOf=home-awg-probe-network.service
+
+[Service]
+Type=simple
+Environment=LOG_LEVEL=error
+ExecStart=/usr/local/bin/amneziawg-go -f awgprobe0
+ExecStartPost=+/usr/bin/python3 /usr/local/lib/home-awg/awg_runtime.py probe-up
+Restart=no
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/run/amneziawg /run/home-awg-probe
+RuntimeDirectory=amneziawg home-awg-probe
+RuntimeDirectoryPreserve=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK

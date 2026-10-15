@@ -1,0 +1,11 @@
+[Unit]
+Description=Local home VPN safety watchdog
+
+[Timer]
+OnBootSec=45s
+OnUnitActiveSec=15s
+AccuracySec=2s
+Unit=home-gateway-watchdog.service
+
+[Install]
+WantedBy=timers.target

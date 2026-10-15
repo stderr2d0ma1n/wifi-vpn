@@ -1,0 +1,22 @@
+[Unit]
+Description=Record isolated VPN probe and guard household direct routing
+Wants=network-online.target
+After=network-online.target sing-box.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/lib/vpn-monitor/monitor.py health
+Group=vpn-monitor
+StateDirectory=vpn-monitor
+StateDirectoryMode=0750
+UMask=0027
+TimeoutStartSec=65
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/vpn-monitor
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+MemoryMax=96M
+CPUQuota=10%

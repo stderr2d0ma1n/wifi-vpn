@@ -218,3 +218,27 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Deployment state and credentials remain outside the source repository.
+/.local-only/
+/private/
+/runtime/
+/backups/
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+*.sqlite*
+*.db
+*.bin
+*.img
+*.img.*
+*.crdownload
+*.zip
+*.tar.gz
+**/*credentials*
+**/auth.json
+**/preferences.json
+**/*.local.*
+.DS_Store

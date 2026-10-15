@@ -1,0 +1,27 @@
+[Unit]
+Description=Temporary private profile import over the existing AWG tunnel
+Requires=home-awg.service
+After=home-awg.service
+
+[Service]
+Type=simple
+User=sing-box
+Group=sing-box
+UMask=0077
+LoadCredential=profile:/etc/home-vps/clients/iphone-clean.json
+LoadCredential=token:/etc/home-vps/private-import/token
+ExecStartPre=+/usr/bin/python3 /usr/local/lib/home-vps/private_profile_server.py firewall-add
+ExecStart=/usr/bin/python3 /usr/local/lib/home-vps/private_profile_server.py serve
+ExecStopPost=+/usr/bin/python3 /usr/local/lib/home-vps/private_profile_server.py firewall-remove
+RuntimeMaxSec=15min
+TimeoutStopSec=5
+Restart=no
+CapabilityBoundingSet=
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_UNIX AF_NETLINK

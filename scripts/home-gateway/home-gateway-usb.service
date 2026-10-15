@@ -1,0 +1,13 @@
+[Unit]
+Description=Local USB Ethernet access for home gateway
+After=local-fs.target systemd-modules-load.service
+Before=ssh.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/home-gateway-usb
+RemainAfterExit=yes
+TimeoutStartSec=45
+
+[Install]
+WantedBy=multi-user.target

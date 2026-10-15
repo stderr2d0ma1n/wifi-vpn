@@ -1,0 +1,12 @@
+[Unit]
+Description=Owned network namespace for AWG comparison only
+Before=home-awg-probe.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/python3 /usr/local/lib/home-awg/awg_runtime.py probe-prepare
+ExecStop=/usr/bin/python3 /usr/local/lib/home-awg/awg_runtime.py probe-down
+RuntimeDirectory=home-awg-probe
+RuntimeDirectoryMode=0700
+RuntimeDirectoryPreserve=yes
