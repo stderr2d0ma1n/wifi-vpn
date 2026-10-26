@@ -29,6 +29,8 @@ def main():
     cidrs = commands.add_parser('cidr')
     cidrs.add_argument('route', choices=['direct', 'vpn', 'remove'])
     cidrs.add_argument('network')
+    auto_return = commands.add_parser('auto-return', help='Owner-authorized return to the same confirmed AWG policy')
+    auto_return.add_argument('action', choices=('on', 'off', 'status'))
     args = parser.parse_args()
     if os.geteuid():
         parser.error('Run with sudo')
@@ -42,10 +44,21 @@ def main():
                               'transport': 'amneziawg' if (gateway.settings / 'awg-outbound.json').exists() else 'vless',
                               'network': gateway.network, 'safety': load(gateway.activation_path, {}),
                               'readiness': load(gateway.settings / 'readiness.json', {}),
+                              'auto_return': gateway.auto_return.status(),
                               'direct_client_ips': gateway.policy.get('direct_client_ips', [])}, ensure_ascii=False, indent=2))
             return
         if args.command == 'policy':
             print(json.dumps(gateway.policy, ensure_ascii=False, indent=2))
+            return
+        if args.command == 'auto-return':
+            if args.action == 'on':
+                result = gateway.auto_return.enable()
+            elif args.action == 'off':
+                gateway.auto_return.disable('owner_disabled')
+                result = gateway.public()
+            else:
+                result = gateway.auto_return.status()
+            print(json.dumps(result, ensure_ascii=False))
             return
         if args.command == 'prepare':
             candidate = gateway.build('rules')

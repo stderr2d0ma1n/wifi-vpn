@@ -12,6 +12,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import time
+from unittest.mock import patch
 
 from gateway_safety import Gateway, atomic, command, load, runtime_hashes
 
@@ -182,8 +183,11 @@ def trace_ip(text):
 def tun_route():
     for _ in range(30):
         if Path('/sys/class/net/gw-test-tun').exists():
-            command(['ip','-4','route','replace','table','30478','default','dev','gw-test-tun'])
-            return
+            # A restarted engine can briefly expose the old interface while
+            # tearing it down. Retry until the new TUN accepts its route.
+            result=command(['ip','-4','route','replace','table','30478','default','dev','gw-test-tun'],check=False)
+            if result.returncode == 0:
+                return
         time.sleep(0.1)
     raise RuntimeError('Lab TUN did not appear')
 
@@ -222,8 +226,10 @@ def verify():
     if os.geteuid():
         raise RuntimeError('Run as root')
     original=snapshot()
-    if original['mode'].strip()!='direct':
-        raise RuntimeError('Preparation is permitted only while household mode is direct')
+    if original['mode'].strip() not in ('direct', 'rules'):
+        raise RuntimeError('Unknown household mode')
+    if original['mode'].strip() == 'rules' and not load('/etc/home-gateway/activation.json', {}).get('confirmed'):
+        raise RuntimeError('Do not run isolated validation during an unconfirmed household trial')
     if BASE.exists() and not (BASE/'owned').exists():
         raise RuntimeError('Unrecognized lab directory')
     if Path('/run/netns/'+NS).exists() or Path('/sys/class/net/'+HOST).exists() or DNS_DIR.exists() or FAILURE.exists():
@@ -327,6 +333,40 @@ def verify():
         if lab.mode_path.read_text().strip()!='direct':
             raise RuntimeError('Three failures did not roll back')
         tests['three_failures_rollback']=True
+        # Exercise the actual return and manual-off paths only on the lab gateway.
+        # Advance only its recovery clock; main watchdog/deadlines keep real time.
+        # Earlier fault tests deliberately restart this unit many times in seconds.
+        command(['systemctl', 'reset-failed', lab.unit])
+        lab.rules(seconds=600)
+        tun_route()
+        lab.confirm()
+        lab.auto_return.enable()
+        with patch.object(lab, 'probe', return_value=False):
+            for _ in range(3):
+                lab.watch()
+        if lab.mode_path.read_text().strip() != 'direct' or not lab.auto_return.state.get('pending'):
+            raise RuntimeError('Confirmed lab outage did not arm automatic return')
+        from auto_return import clock
+        recovery_now, recovery_boot = clock()
+        for tick in range(6):
+            with patch('auto_return.clock', return_value=(recovery_now + tick * 61, recovery_boot)):
+                lab.watch()
+            if lab.mode_path.read_text().strip() != 'direct':
+                raise RuntimeError('Lab returned before completing its stability window')
+        with patch('auto_return.clock', return_value=(recovery_now + 320, recovery_boot)):
+            lab.watch()
+        tun_route()
+        if (lab.mode_path.read_text().strip() != 'rules' or
+                not load(lab.activation_path).get('confirmed') or
+                trace_ip(curl(['https://www.cloudflare.com/cdn-cgi/trace'])) != expected):
+            raise RuntimeError('Automatic lab return did not restore real AWG traffic')
+        tests['automatic_return_after_stable_awg']=True
+        lab.direct()
+        for _ in range(3):
+            lab.watch()
+        if lab.mode_path.read_text().strip() != 'direct' or lab.auto_return.state.get('enabled'):
+            raise RuntimeError('Manual direct did not disarm automatic return')
+        tests['manual_direct_disarms_return']=True
         # A persistently crashing engine must still recover kernel forwarding and DNS.
         FAILURE.parent.mkdir(parents=True,exist_ok=True)
         FAILURE.write_text('[Service]\nExecStart=\nExecStart=/usr/bin/false\n')
@@ -348,7 +388,7 @@ def verify():
     actual.validate(candidate)
     digest=hashlib.sha256(json.dumps(candidate,sort_keys=True).encode()).hexdigest()
     report={'schema_version':1,'ready':all(tests.values()),'verified_at':int(time.time()),
-            'candidate_sha256':digest,'runtime_source_sha256':runtime_hashes(),'tests':tests,'household_mode':'direct',
+            'candidate_sha256':digest,'runtime_source_sha256':runtime_hashes(),'tests':tests,'household_mode':original['mode'].strip(),
             'switch_authorized':False,'scope':'real virtual client; household traffic was not activated'}
     atomic(actual.settings/'readiness.json',report)
     atomic('/var/lib/home-gateway-control/readiness-report.json',report,0o640,'vpn-monitor')

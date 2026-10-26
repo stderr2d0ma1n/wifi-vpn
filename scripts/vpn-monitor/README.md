@@ -66,6 +66,9 @@ The prepared deployment adapts the allowed-mode list alongside the gateway
 safety module. This does not authorize activation. The optional `gateway`
 status includes local watchdog state and the last automatic rollback event;
 the API remains read-only.
+The optional gateway `auto_return` status reports the separately authorized
+return policy, stability checks and retry cooldown. It belongs to the gateway
+watchdog; the monitor does not activate VPN or grant that authorization.
 
 The collector and updater run as `vpn-monitor`. The API runs as a separate
 `vpn-monitor-api` user with read access only. The root coordinator reads the

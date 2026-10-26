@@ -10,7 +10,7 @@ chmod 700 "$backup_dir"
 cp -a /usr/local/lib/home-gateway "$backup_dir/source-before"
 cp -a /etc/home-gateway "$backup_dir/settings-before"
 cp -a /etc/sing-box/config.json "$backup_dir/main-config-before.json"
-for name in gatewayctl.py gateway_cli.py gateway_safety.py build_config.py network_guard.py fallback_dns.py prepare_rule_sets.py verify_home_ready.py; do
+for name in gatewayctl.py gateway_cli.py gateway_safety.py auto_return.py awg_uplink.py build_config.py network_guard.py fallback_dns.py prepare_rule_sets.py verify_home_ready.py; do
     install -m 644 "$source_dir/$name" /usr/local/lib/home-gateway/
 done
 chmod 755 /usr/local/lib/home-gateway/gatewayctl.py

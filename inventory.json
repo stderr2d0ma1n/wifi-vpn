@@ -6,8 +6,8 @@
     {
       "id": "home-gateway",
       "kind": "scripts",
-      "purpose": "Prepare and manage a Linux home gateway with native AmneziaWG uplink, compact pinned domain/IP routing, kernel whole-device bypass, guarded activation and local automatic recovery to direct routing/DNS. Verify using a real isolated virtual client without activating household traffic. Includes VLESS comparison, private iPhone export and Orange Pi recovery tools.",
-      "status": "active_awg_owner_confirmed_auto_rollback_enabled",
+      "purpose": "Linux home gateway with native AWG, pinned domain/IP routing, device bypass, guarded activation, direct fallback and optional owner-authorized return after sustained tunnel recovery.",
+      "status": "active_owner_confirmed_awg_auto_return_enabled_isolated_verified",
       "paths": [
         "scripts/home-gateway"
       ],
@@ -27,7 +27,7 @@
         "Optional private subscription import: existing working AWG, Python 3.9+, systemd LoadCredential support, iptables, service user sing-box; manual 15-minute service only",
         "Home readiness: existing isolated AWG peer and vpn-monitor group; pinned binary SRS rule sets from MetaCubeX and runetfreedom; see HOME_READY.md"
       ],
-      "restore": "Follow scripts/home-gateway/README.md and HOME_READY.md. Compare installed sources and preserve local settings before upgrades. Public per-device deployment metadata stays in .local-only; SSH/VPN secrets remain in existing private paths outside Git. Run isolated readiness verification after policy/source changes. Household activation requires separate explicit owner OK; never restore by blindly enabling rules."
+      "restore": "Follow scripts/home-gateway/README.md and HOME_READY.md; preserve settings and compare deployed sources. Run isolated validation after policy/source changes. Initial activation needs owner approval and separate confirmation. Auto-return is disabled by default and may be enabled only with separate authorization for an already confirmed, unchanged AWG policy. Manual direct cancels it. Device details and credentials stay outside Git."
     },
     {
       "id": "vpn-monitor",
@@ -55,13 +55,13 @@
     },
     {
       "path": "AGENTS.md",
-      "bytes": 1868,
-      "sha256": "344dec689a499bc1d77332c616f23b0eb4b6face05070db5c88a01d2d15f6384"
+      "bytes": 2413,
+      "sha256": "43e4ab9562f1f2d868c9eb9d7eab39eadcbcc1db6893017ff47ba32232ec8688"
     },
     {
       "path": "README.md",
-      "bytes": 7210,
-      "sha256": "381b22223e4a76c90865591a51fb7cbb11577c76d1fb42f46b4c84dadee8a24a"
+      "bytes": 7852,
+      "sha256": "7f323f0454dfba251b109e67ff1601d6fad968657d9b6bf032b880bd7280b84b"
     },
     {
       "path": "configs/home-ready.example.json",
@@ -75,8 +75,8 @@
     },
     {
       "path": "docs/OPERATIONS.md",
-      "bytes": 4871,
-      "sha256": "9bc9f22b7b383fc540b0d253d24bbabf0685f157e4a1a8a04a0acad47995856e"
+      "bytes": 6355,
+      "sha256": "7a76abdc1e14e3287329a6267a56848fc9d9e7bcf9dbc8207e84fafbbf8aaffc"
     },
     {
       "path": "scripts/ai_power.py",
@@ -85,18 +85,23 @@
     },
     {
       "path": "scripts/home-gateway/HOME_READY.md",
-      "bytes": 11372,
-      "sha256": "20f5ef258e86ae6b841a20bb2f14b5266159623ff5ca07eb2c96a651872e72ea"
+      "bytes": 13801,
+      "sha256": "88821a3b37164c836c958d485efa2cb94fed9b07a26d3fb40521adbb6f4fccf6"
     },
     {
       "path": "scripts/home-gateway/README.md",
-      "bytes": 35551,
-      "sha256": "f98951ee2321e6cc1773c3b3f2b15561729a3d109ad70a54876e3c1fc0e582b0"
+      "bytes": 36068,
+      "sha256": "502e7deef6899b3c3561e9253e4707f25e3b36b62d6883f84bae626669692b2a"
     },
     {
       "path": "scripts/home-gateway/add_vless_client.py",
       "bytes": 3661,
       "sha256": "75e3a7b2ca271b4149cc94eaf3c70e904bc7e65b89cc9543e302c0c736c3e050"
+    },
+    {
+      "path": "scripts/home-gateway/auto_return.py",
+      "bytes": 7838,
+      "sha256": "557fe4354b77fd078907dadc18db120a98c3cb4d1e83275d9b321df1439171a9"
     },
     {
       "path": "scripts/home-gateway/awg-uplink-probe.conf",
@@ -165,13 +170,13 @@
     },
     {
       "path": "scripts/home-gateway/gateway_cli.py",
-      "bytes": 4578,
-      "sha256": "208f056c526e1dd971af32ce5f2f501eae430e3e63f3f4564a4009e99728a65e"
+      "bytes": 5267,
+      "sha256": "65f702b1bef8e4af325be39a75d96f5eed70dd2fa8b4a16dfdbc7ec2bbca7b48"
     },
     {
       "path": "scripts/home-gateway/gateway_safety.py",
-      "bytes": 14943,
-      "sha256": "84c3116ca540a4aca33ea8eb3609a80e3c230b071f9a0a17e6b00a65ed47b922"
+      "bytes": 18646,
+      "sha256": "62ac0c9368b1ee0ffb5199e72b76fc8adcf530a7e2307203f8c8a29abaf9bc14"
     },
     {
       "path": "scripts/home-gateway/gatewayctl.py",
@@ -280,8 +285,8 @@
     },
     {
       "path": "scripts/home-gateway/install_home_ready.sh",
-      "bytes": 2910,
-      "sha256": "6d68e00998c8bb465cb6e93b5e301f22277510fde1eb79d39869c03ea298ec1e"
+      "bytes": 2939,
+      "sha256": "796cd0040c6316e46ac5c69b531da6d44429e5f29434e1b00b20d65296f6f858"
     },
     {
       "path": "scripts/home-gateway/install_probe.sh",
@@ -334,6 +339,11 @@
       "sha256": "01317fc05391046cba1f1e6eefada89e33a2c4712d1ecd499ac7d438f0254be8"
     },
     {
+      "path": "scripts/home-gateway/test_auto_return.py",
+      "bytes": 7882,
+      "sha256": "2d6b00b9e04c8e3ebd5848e200f549d6448c7491474356df269b3e49af3b08c6"
+    },
+    {
       "path": "scripts/home-gateway/test_home_safety.py",
       "bytes": 3995,
       "sha256": "40f510cb806ecf88a8d01ad673c844faa4a95fb841bcc9568e386d629b31bb5a"
@@ -345,8 +355,8 @@
     },
     {
       "path": "scripts/home-gateway/verify_home_ready.py",
-      "bytes": 19151,
-      "sha256": "9ca2d5a50c1c1a445506a55274897c15794a338fd0b12df2dcf144044784ec96"
+      "bytes": 21515,
+      "sha256": "fd2bcd4c10294bf7f0f10d2a46b85c25e1787d064306f9f4a45900afc8137b36"
     },
     {
       "path": "scripts/home-gateway/verify_packets.sh",
@@ -385,8 +395,8 @@
     },
     {
       "path": "scripts/vpn-monitor/README.md",
-      "bytes": 9875,
-      "sha256": "9a4083d7ea6ffdce8b20dbe5d20030cc1aaeff07fc5227f675e80666486de5bb"
+      "bytes": 10102,
+      "sha256": "939b0aaeadfc17cf41aa1bddcf25a28b5be9bdc6345c6a6b07c7d77300d92370"
     },
     {
       "path": "scripts/vpn-monitor/client.py",

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Guarded activation and one-way emergency rollback; direct is never auto-enabled to VPN."""
+"""Guarded activation, emergency rollback and explicitly authorized AWG return."""
 import grp
 import hashlib
+import ipaddress
 import json
 import os
 from pathlib import Path
@@ -13,6 +14,7 @@ import time
 
 from build_config import build
 from network_guard import apply as apply_guard
+from auto_return import AutoReturn
 
 
 def atomic(path, value, mode=0o600, group=None):
@@ -50,7 +52,8 @@ def load(path, default=None):
 def runtime_hashes():
     directory = Path(__file__).parent
     return {name: hashlib.sha256((directory / name).read_bytes()).hexdigest()
-            for name in ('build_config.py', 'gateway_safety.py', 'network_guard.py')}
+            for name in ('build_config.py', 'gateway_safety.py', 'network_guard.py',
+                         'auto_return.py', 'gateway_cli.py', 'awg_uplink.py')}
 
 
 def decision(mode, activation, probe_ok, now, boot_id):
@@ -78,19 +81,41 @@ class Gateway:
         self.mode_path = self.settings / 'mode'
         self.network = load(self.settings / 'network.json')
         self.policy = load(self.settings / 'policy.json')
+        self.auto_return = AutoReturn(self)
+
+    def check_readiness(self, config):
+        if self.lab:
+            return
+        readiness = load(self.settings / 'readiness.json', {})
+        digest = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
+        if (not readiness.get('ready') or readiness.get('candidate_sha256') != digest or
+                readiness.get('runtime_source_sha256') != runtime_hashes()):
+            raise RuntimeError('Candidate needs isolated validation before activation')
+
+    def recovery_fingerprint(self):
+        config = self.build('rules')
+        self.check_readiness(config)
+        material = {'config': config, 'runtime': runtime_hashes(),
+                    'safety': load(self.settings / 'safety.json'),
+                    'rule_files': {row['path']: hashlib.sha256(Path(row['path']).read_bytes()).hexdigest()
+                                   for row in self.policy.get('rule_sets', [])}}
+        return hashlib.sha256(json.dumps(material, sort_keys=True).encode()).hexdigest()
 
     def active(self, unit=None):
         return command(['systemctl', 'is-active', '--quiet', unit or self.unit], check=False).returncode == 0
 
-    def wait_dns(self):
+    def wait_port(self, host, port):
         deadline = time.monotonic() + 5
         while time.monotonic() < deadline:
             try:
-                with socket.create_connection((self.network['lan_ip'], 53), timeout=0.3):
+                with socket.create_connection((host, port), timeout=0.3):
                     return True
             except OSError:
                 time.sleep(0.1)
         return False
+
+    def wait_dns(self):
+        return self.wait_port(self.network['lan_ip'], 53)
 
     def build(self, mode):
         transport = self.settings / 'awg-outbound.json'
@@ -137,7 +162,8 @@ class Gateway:
                         fallback_dns_active=self.active(self.dns_unit),
                         confirmation_pending=bool(activation and not activation.get('confirmed') and self.mode_path.read_text().strip() == 'rules'),
                         confirmation_deadline=activation.get('deadline') if not activation.get('confirmed') else None,
-                        consecutive_failures=activation.get('failures', 0))
+                        consecutive_failures=activation.get('failures', 0),
+                        auto_return=self.auto_return.status())
         if transition:
             previous['last_transition'] = dict(transition, at=int(time.time()))
         try:
@@ -164,6 +190,7 @@ class Gateway:
                 command(['ip', '-4', 'rule', 'del', 'priority', str(row['priority'])], check=False)
 
     def direct(self, reason='manual_direct', automatic=False):
+        self.auto_return.rollback(reason, automatic, load(self.activation_path, {}))
         config = self.build('direct')
         validated = True
         try:
@@ -223,15 +250,46 @@ class Gateway:
         except (OSError, subprocess.TimeoutExpired, struct.error):
             return False
 
-    def rules(self, seconds=180):
+    def probe_uplink(self):
+        """Read-only checks of the existing AWG path while household traffic is direct."""
+        try:
+            command(['python3', '/usr/local/lib/home-gateway/awg_uplink.py', 'verify'])
+            expected = load(self.settings / 'safety.json')['expected_exit_ip']
+            base = ['curl', '--noproxy', '*', '--interface', 'awg-home', '-4', '--silent', '--show-error',
+                    '--connect-timeout', '3', '--max-time', '6', '--max-filesize', '65536']
+            trace = command(base + ['https://www.cloudflare.com/cdn-cgi/trace'], check=False, timeout=8)
+            if trace.returncode or 'ip=' + expected not in trace.stdout.splitlines():
+                return False
+            alternate = command(base + ['--output', '/dev/null', '--write-out', '%{http_code}',
+                                       'https://www.gstatic.com/generate_204'], check=False, timeout=8)
+            if alternate.returncode or alternate.stdout.strip() != '204':
+                return False
+            for suffix in ([], ['+tcp']):
+                dns = command(['ip', 'netns', 'exec', 'home-awg-test', 'dig', '@1.1.1.1',
+                               'example.com', 'A', '+short', '+time=3', '+tries=1'] + suffix,
+                              check=False, timeout=5)
+                answers = []
+                for line in dns.stdout.splitlines():
+                    try:
+                        answers.append(ipaddress.IPv4Address(line))
+                    except ValueError:
+                        pass
+                if dns.returncode or not any(address.is_global for address in answers):
+                    return False
+            return True
+        except (OSError, RuntimeError, subprocess.TimeoutExpired, KeyError):
+            return False
+
+    def rules(self, seconds=180, automatic=False):
+        if automatic:
+            if not self.auto_return.state.get('enabled') or not self.auto_return.matches():
+                raise RuntimeError('Automatic return is not authorized for this candidate')
+        elif self.auto_return.state.get('enabled'):
+            self.auto_return.disable('manual_trial')
         config = self.build('rules')
         self.validate(config)
+        self.check_readiness(config)
         if not self.lab:
-            readiness = load(self.settings / 'readiness.json', {})
-            digest = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
-            if (not readiness.get('ready') or readiness.get('candidate_sha256') != digest or
-                    readiness.get('runtime_source_sha256') != runtime_hashes()):
-                raise RuntimeError('Candidate needs isolated validation before activation')
             command(['systemctl', 'start', 'home-awg-uplink.service'])
             command(['python3', '/usr/local/lib/home-gateway/awg_uplink.py', 'verify'])
             expected = load(self.settings / 'safety.json')['expected_exit_ip']
@@ -250,14 +308,17 @@ class Gateway:
             atomic(self.config, config, 0o640, 'sing-box')
             atomic(self.mode_path, 'rules\n')
             command(['systemctl', 'restart', self.unit])
-            if not self.active():
-                raise RuntimeError('Main service unavailable')
+            if (not self.active() or not self.wait_dns() or
+                    not self.wait_port('127.0.0.1', self.health_port)):
+                raise RuntimeError('Main service listeners did not become ready')
             return self.public({'kind': 'trial_started', 'reason': 'awaiting_confirmation'})
         except Exception:
             self.direct('activation_failed', automatic=True)
             raise
 
-    def confirm(self):
+    def confirm(self, automatic=False):
+        if automatic and (not self.auto_return.state.get('enabled') or not self.auto_return.matches()):
+            raise RuntimeError('Automatic confirmation is not authorized')
         activation = load(self.activation_path, {})
         if not activation.get('confirmed') and int(time.time()) >= activation.get('deadline', 0):
             raise RuntimeError('Trial confirmation deadline expired')
@@ -265,9 +326,11 @@ class Gateway:
             raise RuntimeError('Cannot confirm an inactive or unhealthy VPN')
         if not activation.get('confirmed') and int(time.time()) >= activation.get('deadline', 0):
             raise RuntimeError('Trial expired during connectivity verification')
-        activation.update(confirmed=True, confirmed_at=int(time.time()), failures=0)
+        activation.update(confirmed=True, confirmed_at=int(time.time()), failures=0,
+                          confirmed_by='auto_return' if automatic else 'owner')
         atomic(self.activation_path, activation)
-        return self.public({'kind': 'trial_confirmed', 'reason': 'owner_confirmed'})
+        return self.public({'kind': 'automatic_return' if automatic else 'trial_confirmed',
+                            'reason': 'tunnel_stable' if automatic else 'owner_confirmed'})
 
     def watch(self):
         mode = self.mode_path.read_text().strip()
@@ -275,15 +338,17 @@ class Gateway:
         if mode != 'rules':
             if not self.active() and not self.active(self.dns_unit):
                 return self.direct('main_service_failed_while_direct', automatic=True)
-            return self.public()
+            return self.auto_return.watch()
         boot = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
         # Do not delay an expired trial while waiting for network timeouts.
         action, _ = decision(mode, activation, True, int(time.time()), boot)
         if action == 'confirmation_timeout':
             return self.direct(action, automatic=True)
-        action, failures = decision(mode, activation, self.probe(), int(time.time()), boot)
+        probe_ok = self.probe()
+        action, failures = decision(mode, activation, probe_ok, int(time.time()), boot)
         activation['failures'] = failures
         atomic(self.activation_path, activation)
         if action in ('confirmation_timeout', 'connectivity_failed'):
             return self.direct(action, automatic=True)
+        self.auto_return.active(probe_ok)
         return self.public()
