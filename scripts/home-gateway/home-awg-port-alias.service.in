@@ -1,0 +1,21 @@
+[Unit]
+Description=Owner-approved UDP port alias to existing home AWG listener
+Requires=home-awg.service
+After=network-online.target ufw.service home-awg.service
+PartOf=home-awg.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/iptables -w 5 -t nat -A PREROUTING -i @WAN_INTERFACE@ -p udp -d @VPS_IPV4@ --dport @ALIAS_PORT@ -m comment --comment home-awg-alias-@ALIAS_PORT@ -j REDIRECT --to-ports @AWG_PORT@
+ExecStop=/usr/sbin/iptables -w 5 -t nat -D PREROUTING -i @WAN_INTERFACE@ -p udp -d @VPS_IPV4@ --dport @ALIAS_PORT@ -m comment --comment home-awg-alias-@ALIAS_PORT@ -j REDIRECT --to-ports @AWG_PORT@
+TimeoutStartSec=15
+TimeoutStopSec=15
+CapabilityBoundingSet=CAP_NET_ADMIN
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

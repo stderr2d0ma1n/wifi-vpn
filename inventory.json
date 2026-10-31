@@ -25,7 +25,8 @@
         "Optional Xray interoperability check: verified official Linux release binary for target architecture",
         "Optional private JSON QR: macOS system CoreImage/ImageIO/UniformTypeIdentifiers and Swift Command Line Tools; local decode verification",
         "Optional private subscription import: existing working AWG, Python 3.9+, systemd LoadCredential support, iptables, service user sing-box; manual 15-minute service only",
-        "Home readiness: existing isolated AWG peer and vpn-monitor group; pinned binary SRS rule sets from MetaCubeX and runetfreedom; see HOME_READY.md"
+        "Home readiness: existing isolated AWG peer and vpn-monitor group; pinned binary SRS rule sets from MetaCubeX and runetfreedom; see HOME_READY.md",
+        "Optional owner-approved AWG UDP port alias: existing VPS home-awg.service, UFW and iptables; render and verify the unit template as described in PORT_ALIAS.md"
       ],
       "restore": "Follow scripts/home-gateway/README.md and HOME_READY.md; preserve settings and compare deployed sources. Run isolated validation after policy/source changes. Initial activation needs owner approval and separate confirmation. Auto-return is disabled by default and may be enabled only with separate authorization for an already confirmed, unchanged AWG policy. Manual direct cancels it. Device details and credentials stay outside Git."
     },
@@ -89,9 +90,14 @@
       "sha256": "88821a3b37164c836c958d485efa2cb94fed9b07a26d3fb40521adbb6f4fccf6"
     },
     {
+      "path": "scripts/home-gateway/PORT_ALIAS.md",
+      "bytes": 4450,
+      "sha256": "2d34b208089d24690f33f6beb41f8bb074402c6382abfcc62b6f9261fd817530"
+    },
+    {
       "path": "scripts/home-gateway/README.md",
-      "bytes": 36068,
-      "sha256": "502e7deef6899b3c3561e9253e4707f25e3b36b62d6883f84bae626669692b2a"
+      "bytes": 36468,
+      "sha256": "eaa0ff594c41d708a8d0ce5351774eeb75395d6026d40324e0517f597c2e2fbb"
     },
     {
       "path": "scripts/home-gateway/add_vless_client.py",
@@ -187,6 +193,11 @@
       "path": "scripts/home-gateway/harden_vps_ssh.sh",
       "bytes": 1330,
       "sha256": "d2ae0d7ccb87362a7374c35d17b079726cf847f3fafa7c98a79e8a4ff26648f2"
+    },
+    {
+      "path": "scripts/home-gateway/home-awg-port-alias.service.in",
+      "bytes": 810,
+      "sha256": "f5e65d18d7e8220e8794beba2771e49ac94d081c02c60d5709367b5df2fee13e"
     },
     {
       "path": "scripts/home-gateway/home-awg-probe-network.service",
